@@ -22,7 +22,11 @@ public class ServerController implements ServerConnection.ServerListener {
 
     @Override
     public void updated(Loan loan) {
-
         serverLogTextArea.appendText("Monthly:" + loan.getMonthlyPayment() + "\nTotal payment: " + loan.getTotalPayment() + "\n");
+    }
+
+    @Override
+    public void displayMessage(String message) {
+        serverLogTextArea.appendText(message + "\n");
     }
 }

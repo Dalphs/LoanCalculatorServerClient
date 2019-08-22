@@ -4,6 +4,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 public class ServerConnection implements Runnable {
     private static int port = 8000;
@@ -15,6 +16,7 @@ public class ServerConnection implements Runnable {
 
     public interface ServerListener{
         void updated(Loan loan);
+        void displayMessage(String message);
     }
 
     public ServerConnection(ServerListener listener) {
@@ -25,7 +27,9 @@ public class ServerConnection implements Runnable {
     public void run() {
         try {
             serverSocket = new ServerSocket(port);
+            listener.displayMessage(new Date() + ": Server started");
             socket = serverSocket.accept();
+            listener.displayMessage(new Date() + ": Connected to client");
             System.out.println("Forbindelse med client succesfuld");
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
