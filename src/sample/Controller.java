@@ -10,7 +10,8 @@ import java.io.*;
 import java.net.Socket;
 
 
-public class Controller {
+public class Controller implements ClientSend.ClientSendListener {
+    public Button submitButton1;
     @FXML
     Button submitButton;
     @FXML
@@ -21,24 +22,8 @@ public class Controller {
     TextField amountTextField;
     @FXML
     TextArea logTextArea;
+    private ClientSend clientSend;
 
-    private static int port = 8000;
-    private static ObjectInputStream in;
-    private static ObjectOutputStream out;
-    private static Socket socket;
-    private static String host = "localhost";
-
-    @FXML
-    public void initialize(){
-        try {
-            socket = new Socket(host, port);
-            in = new ObjectInputStream(socket.getInputStream());
-            out = new ObjectOutputStream(socket.getOutputStream());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void submitPressed(ActionEvent actionEvent) {
         double rate, years, amount;
@@ -46,14 +31,18 @@ public class Controller {
         years = Double.parseDouble(yearsTextField.getText());
         amount = Double.parseDouble(amountTextField.getText());
         Loan loan = new Loan(rate, years, amount);
-        logTextArea.appendText("Annual interest rate: " + loan.getRate() + "\nNumber of years: " + loan.getYears() + "\n" + "\nTotal amount: " + loan.getAmount() + "\n");
-        try {
-            out.writeObject(loan);
-            loan = (Loan) in.readObject();
+        logTextArea.appendText("Annual interest rate: " + loan.getRate() + "\nNumber of years: " + loan.getYears() + "\nTotal amount: " + loan.getAmount() + "\n");
+        clientSend.setLoan(loan);
+        Thread thread = new Thread(clientSend);
+        thread.start();
+    }
 
-            logTextArea.appendText("Monthly payment: " + loan.getMonthlyPayment() + "\nTotal payment: " + loan.getTotalPayment() + "\n");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void startConnection(ActionEvent actionEvent) {
+        clientSend = new ClientSend(this);
+    }
+
+    @Override
+    public void answered(Loan loan) {
+        logTextArea.appendText("Monthly payment: " + loan.getTotalPayment() + "\nTotal Payment: " + loan.getTotalPayment() + "\n\n");
     }
 }
